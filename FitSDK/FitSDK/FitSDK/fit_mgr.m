@@ -69,17 +69,133 @@ void WriteData(const void *data, FIT_UINT8 data_size, FILE *fp);
 
 static FIT_UINT16 data_crc;
 
-int createTestFit(const char *path)
-{
-    FILE *fp;
+static FILE *static_fp;
+
+//int createTestFit(const char *path)
+//{
+//    FILE *fp;
+//    
+//    data_crc = 0;
+//    
+//    fp = fopen(path, "w+b");
+//    printf("%s", path);
+//    
+//    WriteFileHeader(fp);
+//    
+//    // Write file id message.
+//    {
+//        FIT_UINT8 local_mesg_number = 0;
+//        FIT_FILE_ID_MESG file_id;
+//        Fit_InitMesg(fit_mesg_defs[FIT_MESG_FILE_ID], &file_id);
+//        
+//        // @xaoxuu: type FIT_FILE_ACTIVITY = 4 活动数据
+//        file_id.type = FIT_FILE_ACTIVITY;
+//        // @xaoxuu: 厂商
+//        file_id.manufacturer = FIT_MANUFACTURER_GARMIN;
+//        // @xaoxuu: 产品
+//        //        file_id.product_name
+//        file_id.product = 0;
+//        // @xaoxuu: 序列号
+//        file_id.serial_number = 3870143719;
+//        // @xaoxuu: 生产日期
+//        //        file_id.time_created
+//        
+//        WriteMessageDefinition(local_mesg_number, fit_mesg_defs[FIT_MESG_FILE_ID], FIT_FILE_ID_MESG_DEF_SIZE, fp);
+//        WriteMessage(local_mesg_number, &file_id, FIT_FILE_ID_MESG_SIZE, fp);
+//    }
+//    
+//    
+//    // Write a Field Description
+//    {
+//        FIT_UINT8 local_mesg_number = 1;
+//        FIT_FIELD_DESCRIPTION_MESG field_description_mesg;
+//        
+//        Fit_InitMesg(fit_mesg_defs[FIT_MESG_FIELD_DESCRIPTION], &field_description_mesg);
+//        field_description_mesg.developer_data_index = 0;
+//        field_description_mesg.field_definition_number = 0;
+//        field_description_mesg.fit_base_type_id = FIT_BASE_TYPE_UINT16;
+//        WriteMessageDefinition(local_mesg_number, fit_mesg_defs[FIT_MESG_FIELD_DESCRIPTION], FIT_FIELD_DESCRIPTION_MESG_DEF_SIZE, fp);
+//        WriteMessage(local_mesg_number, &field_description_mesg, FIT_FIELD_DESCRIPTION_MESG_SIZE, fp);
+//    }
+//    
+//    //Record Defenition
+//    
+//    {
+//        FIT_UINT8 local_mesg_number = 2;
+//        WriteMessageDefinition(local_mesg_number, fit_mesg_defs[FIT_MESG_RECORD],
+//                               FIT_RECORD_MESG_DEF_SIZE, fp);
+//    }
+//    
+//    //Record message
+//    {
+//        FIT_UINT8 local_mesg_number = 2;
+//        FIT_RECORD_MESG record;
+//        
+//        Fit_InitMesg(fit_mesg_defs[FIT_MESG_RECORD], &record);
+//        record.timestamp = 702940946;
+//        record.position_lat = 495280430;
+//        record.position_long = -872696681;
+//        record.distance = 2;
+//        record.altitude = 278.2;
+//        record.speed = 0.29;
+//        record.heart_rate = 68;
+//        
+//        WriteMessage(local_mesg_number,&record,FIT_RECORD_MESG_SIZE,fp);
+//    }
+//    
+//    //Session message
+//    {
+//        FIT_UINT8 local_mesg_number = 3;
+//        FIT_SESSION_MESG session;
+//        
+//        Fit_InitMesg(fit_mesg_defs[FIT_MESG_SESSION], &session);
+//        session.sport = FIT_SPORT_RUNNING;
+//        
+//        WriteMessageDefinition(local_mesg_number, fit_mesg_defs[FIT_MESG_SESSION],
+//                               FIT_SESSION_MESG_DEF_SIZE, fp); //所有字段定义过长，正尝试如何裁剪
+//        WriteMessage(local_mesg_number, &session, FIT_SESSION_MESG_SIZE, fp);
+//        
+//    }
+//    
+//    //Activity message
+//    {
+//        FIT_UINT8 local_mesg_number = 4;
+//        FIT_ACTIVITY_MESG activity;
+//        
+//        Fit_InitMesg(fit_mesg_defs[FIT_MESG_ACTIVITY], &activity);
+//        activity.num_sessions = 1;
+//        
+//        WriteMessageDefinition(local_mesg_number, fit_mesg_defs[FIT_MESG_ACTIVITY],
+//                               FIT_ACTIVITY_MESG_DEF_SIZE, fp);
+//        WriteMessage(local_mesg_number, &activity, FIT_ACTIVITY_MESG_SIZE, fp);
+//        
+//    }
+//    
+//    
+//    
+//    // Write CRC.
+//    fwrite(&data_crc, 1, sizeof(FIT_UINT16), fp);
+//    
+//    // Update file header with data size.
+//    WriteFileHeader(fp);
+//    
+//    fclose(fp);
+//    
+//    return 0;
+//}
+
+void fit_start_transaction(const char *path){
     
     data_crc = 0;
     
-    fp = fopen(path, "w+b");
+    static_fp = fopen(path, "w+b");
     printf("%s", path);
     
-    WriteFileHeader(fp);
+    WriteFileHeader(static_fp);
     
+}
+
+void fit_transaction_file(FIT_FILE type, FIT_MANUFACTURER manufacturer, FIT_UINT16 product, FIT_UINT32Z serial_number){
     // Write file id message.
     {
         FIT_UINT8 local_mesg_number = 0;
@@ -87,22 +203,25 @@ int createTestFit(const char *path)
         Fit_InitMesg(fit_mesg_defs[FIT_MESG_FILE_ID], &file_id);
         
         // @xaoxuu: type FIT_FILE_ACTIVITY = 4 活动数据
-        file_id.type = FIT_FILE_ACTIVITY;
+        file_id.type = type;
         // @xaoxuu: 厂商
-        file_id.manufacturer = FIT_MANUFACTURER_GARMIN;
+        file_id.manufacturer = manufacturer;
         // @xaoxuu: 产品
         //        file_id.product_name
-        file_id.product = 0;
+        file_id.product = product;
         // @xaoxuu: 序列号
-        file_id.serial_number = 3870143719;
+        file_id.serial_number = serial_number;
         // @xaoxuu: 生产日期
-        //        file_id.time_created
+        //        time_t now;
+        //        time(&now);
+        //        file_id.time_created = now;
         
-        WriteMessageDefinition(local_mesg_number, fit_mesg_defs[FIT_MESG_FILE_ID], FIT_FILE_ID_MESG_DEF_SIZE, fp);
-        WriteMessage(local_mesg_number, &file_id, FIT_FILE_ID_MESG_SIZE, fp);
+        WriteMessageDefinition(local_mesg_number, fit_mesg_defs[FIT_MESG_FILE_ID], FIT_FILE_ID_MESG_DEF_SIZE, static_fp);
+        WriteMessage(local_mesg_number, &file_id, FIT_FILE_ID_MESG_SIZE, static_fp);
     }
-    
-    
+}
+
+void fit_transaction_field_desc() {
     // Write a Field Description
     {
         FIT_UINT8 local_mesg_number = 1;
@@ -112,140 +231,21 @@ int createTestFit(const char *path)
         field_description_mesg.developer_data_index = 0;
         field_description_mesg.field_definition_number = 0;
         field_description_mesg.fit_base_type_id = FIT_BASE_TYPE_UINT16;
-        WriteMessageDefinition(local_mesg_number, fit_mesg_defs[FIT_MESG_FIELD_DESCRIPTION], FIT_FIELD_DESCRIPTION_MESG_DEF_SIZE, fp);
-        WriteMessage(local_mesg_number, &field_description_mesg, FIT_FIELD_DESCRIPTION_MESG_SIZE, fp);
+        WriteMessageDefinition(local_mesg_number, fit_mesg_defs[FIT_MESG_FIELD_DESCRIPTION], FIT_FIELD_DESCRIPTION_MESG_DEF_SIZE, static_fp);
+        WriteMessage(local_mesg_number, &field_description_mesg, FIT_FIELD_DESCRIPTION_MESG_SIZE, static_fp);
     }
-    
+}
+
+void fit_transaction_record_def(){
     //Record Defenition
-    
     {
         FIT_UINT8 local_mesg_number = 2;
         WriteMessageDefinition(local_mesg_number, fit_mesg_defs[FIT_MESG_RECORD],
-                               FIT_RECORD_MESG_DEF_SIZE, fp);
+                               FIT_RECORD_MESG_DEF_SIZE, static_fp);
     }
-    
-    //Record message
-    {
-        FIT_UINT8 local_mesg_number = 2;
-        FIT_RECORD_MESG record;
-        
-        Fit_InitMesg(fit_mesg_defs[FIT_MESG_RECORD], &record);
-        record.timestamp = 702940946;
-        record.position_lat = 495280430;
-        record.position_long = -872696681;
-        record.distance = 2;
-        record.altitude = 278.2;
-        record.speed = 0.29;
-        record.heart_rate = 68;
-        
-        WriteMessage(local_mesg_number,&record,FIT_RECORD_MESG_SIZE,fp);
-    }
-    
-    //Session message
-    {
-        FIT_UINT8 local_mesg_number = 3;
-        FIT_SESSION_MESG session;
-        
-        Fit_InitMesg(fit_mesg_defs[FIT_MESG_SESSION], &session);
-        session.sport = FIT_SPORT_RUNNING;
-        
-        WriteMessageDefinition(local_mesg_number, fit_mesg_defs[FIT_MESG_SESSION],
-                               FIT_SESSION_MESG_DEF_SIZE, fp); //所有字段定义过长，正尝试如何裁剪
-        WriteMessage(local_mesg_number, &session, FIT_SESSION_MESG_SIZE, fp);
-        
-    }
-    
-    //Activity message
-    {
-        FIT_UINT8 local_mesg_number = 4;
-        FIT_ACTIVITY_MESG activity;
-        
-        Fit_InitMesg(fit_mesg_defs[FIT_MESG_ACTIVITY], &activity);
-        activity.num_sessions = 1;
-        
-        WriteMessageDefinition(local_mesg_number, fit_mesg_defs[FIT_MESG_ACTIVITY],
-                               FIT_ACTIVITY_MESG_DEF_SIZE, fp);
-        WriteMessage(local_mesg_number, &activity, FIT_ACTIVITY_MESG_SIZE, fp);
-        
-    }
-    
-    
-    
-    // Write CRC.
-    fwrite(&data_crc, 1, sizeof(FIT_UINT16), fp);
-    
-    // Update file header with data size.
-    WriteFileHeader(fp);
-    
-    fclose(fp);
-    
-    return 0;
 }
 
-FILE *fit_start_transaction(const char *path){
-    FILE *fp;
-    
-    data_crc = 0;
-    
-    fp = fopen(path, "w+b");
-    printf("%s", path);
-    
-    WriteFileHeader(fp);
-    
-    // Write file id message.
-    {
-        FIT_UINT8 local_mesg_number = 0;
-        FIT_FILE_ID_MESG file_id;
-        Fit_InitMesg(fit_mesg_defs[FIT_MESG_FILE_ID], &file_id);
-        
-        // @xaoxuu: type FIT_FILE_ACTIVITY = 4 活动数据
-        file_id.type = FIT_FILE_ACTIVITY;
-        // @xaoxuu: 厂商
-        file_id.manufacturer = FIT_MANUFACTURER_GARMIN;
-        // @xaoxuu: 产品
-        //        file_id.product_name
-        file_id.product = 0;
-        // @xaoxuu: 序列号
-        file_id.serial_number = 3870143719;
-        // @xaoxuu: 生产日期
-//        time_t now;
-//        time(&now);
-//        file_id.time_created = now;
-        
-        WriteMessageDefinition(local_mesg_number, fit_mesg_defs[FIT_MESG_FILE_ID], FIT_FILE_ID_MESG_DEF_SIZE, fp);
-        WriteMessage(local_mesg_number, &file_id, FIT_FILE_ID_MESG_SIZE, fp);
-    }
-    
-    
-    // Write a Field Description
-    {
-        FIT_UINT8 local_mesg_number = 1;
-        FIT_FIELD_DESCRIPTION_MESG field_description_mesg;
-        
-        Fit_InitMesg(fit_mesg_defs[FIT_MESG_FIELD_DESCRIPTION], &field_description_mesg);
-        field_description_mesg.developer_data_index = 0;
-        field_description_mesg.field_definition_number = 0;
-        field_description_mesg.fit_base_type_id = FIT_BASE_TYPE_UINT16;
-        WriteMessageDefinition(local_mesg_number, fit_mesg_defs[FIT_MESG_FIELD_DESCRIPTION], FIT_FIELD_DESCRIPTION_MESG_DEF_SIZE, fp);
-        WriteMessage(local_mesg_number, &field_description_mesg, FIT_FIELD_DESCRIPTION_MESG_SIZE, fp);
-    }
-    
-    return fp;
-}
-
-void fit_record_def(FILE *fp){
-    //Record Defenition
-    
-    {
-        FIT_UINT8 local_mesg_number = 2;
-        WriteMessageDefinition(local_mesg_number, fit_mesg_defs[FIT_MESG_RECORD],
-                               FIT_RECORD_MESG_DEF_SIZE, fp);
-    }
-    
-    
-}
-
-void fit_record_msg(FILE *fp, unsigned int timestamp, int position_lat, int position_long, unsigned int distance, unsigned short altitude, unsigned short speed, unsigned char heart_rate){
+void fit_transaction_record_msg(unsigned int timestamp, int position_lat, int position_long, unsigned int distance, unsigned short altitude, unsigned short speed, unsigned char heart_rate){
     //Record message
     {
         FIT_UINT8 local_mesg_number = 2;
@@ -267,23 +267,23 @@ void fit_record_msg(FILE *fp, unsigned int timestamp, int position_lat, int posi
         record.altitude = altitude;
         record.speed = speed;
         record.heart_rate = heart_rate;
-        WriteMessage(local_mesg_number,&record,FIT_RECORD_MESG_SIZE,fp);
+        WriteMessage(local_mesg_number,&record,FIT_RECORD_MESG_SIZE,static_fp);
     }
 }
 
 
-void fit_commit_transaction(FILE *fp){
+void fit_commit_transaction(FIT_SPORT sport){
     //Session message
     {
         FIT_UINT8 local_mesg_number = 3;
         FIT_SESSION_MESG session;
         
         Fit_InitMesg(fit_mesg_defs[FIT_MESG_SESSION], &session);
-        session.sport = FIT_SPORT_RUNNING;
+        session.sport = sport;
         
         WriteMessageDefinition(local_mesg_number, fit_mesg_defs[FIT_MESG_SESSION],
-                               FIT_SESSION_MESG_DEF_SIZE, fp); //所有字段定义过长，正尝试如何裁剪
-        WriteMessage(local_mesg_number, &session, FIT_SESSION_MESG_SIZE, fp);
+                               FIT_SESSION_MESG_DEF_SIZE, static_fp); //所有字段定义过长，正尝试如何裁剪
+        WriteMessage(local_mesg_number, &session, FIT_SESSION_MESG_SIZE, static_fp);
         
     }
     
@@ -296,30 +296,34 @@ void fit_commit_transaction(FILE *fp){
         activity.num_sessions = 1;
         
         WriteMessageDefinition(local_mesg_number, fit_mesg_defs[FIT_MESG_ACTIVITY],
-                               FIT_ACTIVITY_MESG_DEF_SIZE, fp);
-        WriteMessage(local_mesg_number, &activity, FIT_ACTIVITY_MESG_SIZE, fp);
+                               FIT_ACTIVITY_MESG_DEF_SIZE, static_fp);
+        WriteMessage(local_mesg_number, &activity, FIT_ACTIVITY_MESG_SIZE, static_fp);
         
     }
     
     
     
     // Write CRC.
-    fwrite(&data_crc, 1, sizeof(FIT_UINT16), fp);
+    fwrite(&data_crc, 1, sizeof(FIT_UINT16), static_fp);
     
     // Update file header with data size.
-    WriteFileHeader(fp);
+    WriteFileHeader(static_fp);
     
-    fclose(fp);
-
+    fclose(static_fp);
 }
 
 
 
-void fit_transaction(const char *path, void (^record)(FILE *fp)) {
-    FILE *fp = fit_start_transaction(path);
-    fit_record_def(fp);
-    record(fp);
-    fit_commit_transaction(fp);
+void fit_transaction(const char *path, FIT_SPORT sport, void (^record)()) {
+    fit_start_transaction(path);
+    fit_transaction_file(FIT_FILE_ACTIVITY, FIT_MANUFACTURER_GARMIN, 0, 3870143719);
+    
+    fit_transaction_field_desc();
+    fit_transaction_record_def();
+    
+    record();
+    
+    fit_commit_transaction(sport);
     
 }
 

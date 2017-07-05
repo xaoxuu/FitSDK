@@ -17,24 +17,13 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
-
-#ifndef FitSdkManager_h
-#define FitSdkManager_h
+#import "fit_example.h"
 
 int createTestFit(const char *path);
 
-// 开始
-//FILE *fit_start_transaction(const char *path);
-// record
-void fit_record_def(FILE *fp);
-// record
-void fit_record_msg(FILE *fp, unsigned int timestamp, int position_lat, int position_long, unsigned int distance, unsigned short altitude, unsigned short speed, unsigned char heart_rate);
-// 提交
-//void fit_commit_transaction(FILE *fp);
-
 // 创建fit文件
-void fit_transaction(const char *path, void (^record)(FILE *fp));
+void fit_transaction(const char *path, FIT_SPORT sport, void (^record)());
 
+// 添加一条record
+void fit_transaction_record_msg(unsigned int timestamp, int position_lat, int position_long, unsigned int distance, unsigned short altitude, unsigned short speed, unsigned char heart_rate);
 
-
-#endif /* FitSdkManager_h */

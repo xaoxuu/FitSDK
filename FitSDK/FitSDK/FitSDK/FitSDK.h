@@ -19,7 +19,7 @@
  @param activity 活动数据
  @return 活动数据模型
  */
-+ (FitActivity *)createActivityFitFile:(void (^)(FitActivity *activity))activity;
++ (FitActivity *)createActivity:(void (^)(FitActivity *activity))activity;
 
 
 @end

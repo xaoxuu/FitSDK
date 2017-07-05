@@ -11,22 +11,22 @@
 
 @implementation FitSDK
 
-+ (FitActivity *)createActivityFitFile:(void (^)(FitActivity *activity))activity{
++ (FitActivity *)createActivity:(void (^)(FitActivity *activity))activity{
     FitActivity *act = [FitActivity new];
     if (activity) {
         activity(act);
     }
-    [self createActivityFitFileWithModel:act];
+    [self createActivityWithModel:act];
     return act;
 }
 
 
-+ (void)createActivityFitFileWithModel:(FitActivity *)activity{
++ (void)createActivityWithModel:(FitActivity *)activity{
     // @xaoxuu: fit file
     const char *fp = [activity.path cStringUsingEncoding:NSUTF8StringEncoding];
-    fit_transaction(fp, ^(FILE *fp) {
+    fit_transaction(fp, activity.type, ^{
         [activity.records enumerateObjectsUsingBlock:^(FitActivityRecord * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            fit_record_msg(fp, obj.timestamp, obj.position_lat, obj.position_long, obj.distance, obj.altitude, obj.speed, obj.heart_rate);
+            fit_transaction_record_msg(obj.timestamp, obj.position_lat, obj.position_long, obj.distance, obj.altitude, obj.speed, obj.heart_rate);
         }];
     });
 }

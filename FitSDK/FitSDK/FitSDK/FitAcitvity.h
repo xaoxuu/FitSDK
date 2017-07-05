@@ -12,11 +12,11 @@
 
 @class FitActivityRecord;
 typedef NS_ENUM(NSUInteger, FitActivityType) {
-    FitActivityTypeWalk,
-    FitActivityTypeRun,
-    FitActivityTypeRide,
-    FitActivityTypeSwim,
-    FitActivityTypeHike,
+    FitActivityTypeWalk = 11, // 枚举值等于FIT_SPORT值
+    FitActivityTypeRun = 1,
+    FitActivityTypeRide = 2,
+    FitActivityTypeSwim = 5,
+    FitActivityTypeHike = 17,
 };
 
 @interface FitActivity : NSObject
