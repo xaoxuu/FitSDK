@@ -1,6 +1,11 @@
 # FitSDK
 FitSDK for iOS https://www.thisisant.com/resources/fit
 
+## 相关下载
+
+- [FitSDKRelease_20.35.00.zip](https://github.com/xaoxuu/FitSDK/releases/download/1.0.0/FitSDKRelease_20.35.00.zip)
+
+
 
 
 ## 配置环境
