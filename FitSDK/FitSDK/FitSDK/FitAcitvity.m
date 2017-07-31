@@ -59,8 +59,15 @@
 }
 
 - (NSString *)pathWithName:(NSString *)name{
-    NSString *path = [NSTemporaryDirectory() stringByAppendingPathComponent:name];
+    NSString *path = [[NSTemporaryDirectory() stringByAppendingPathComponent:@"com.xaoxuu.fitsdk"] stringByAppendingPathComponent:name];
     path = [path stringByAppendingPathExtension:@"fit"];
+    // create dir if not exist
+    NSFileManager *fm = [NSFileManager defaultManager];
+    NSString *dir = path.stringByDeletingLastPathComponent;
+    BOOL result = [fm createDirectoryAtPath:dir withIntermediateDirectories:YES attributes:nil error:nil];
+    if (!result) {
+        NSLog(@"can not create the directory at path %@",dir);
+    }
     return path;
 }
 
