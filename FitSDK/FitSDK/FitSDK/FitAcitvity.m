@@ -59,8 +59,7 @@
 }
 
 - (NSString *)pathWithName:(NSString *)name{
-    NSString *path = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES)[0];
-    path = [path stringByAppendingPathComponent:name];
+    NSString *path = [NSTemporaryDirectory() stringByAppendingPathComponent:name];
     path = [path stringByAppendingPathExtension:@"fit"];
     return path;
 }

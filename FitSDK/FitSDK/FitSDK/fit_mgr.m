@@ -189,7 +189,7 @@ void fit_start_transaction(const char *path){
     data_crc = 0;
     
     static_fp = fopen(path, "w+b");
-    printf("%s", path);
+//    printf("%s", path);
     
     WriteFileHeader(static_fp);
     
