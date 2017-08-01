@@ -273,33 +273,33 @@ void fit_transaction_record_msg(unsigned int timestamp, int position_lat, int po
 
 
 void fit_commit_transaction(FIT_SPORT sport){
-    //Session message
-    {
-        FIT_UINT8 local_mesg_number = 3;
-        FIT_SESSION_MESG session;
-        
-        Fit_InitMesg(fit_mesg_defs[FIT_MESG_SESSION], &session);
-        session.sport = sport;
-        
-        WriteMessageDefinition(local_mesg_number, fit_mesg_defs[FIT_MESG_SESSION],
-                               FIT_SESSION_MESG_DEF_SIZE, static_fp); //所有字段定义过长，正尝试如何裁剪
-        WriteMessage(local_mesg_number, &session, FIT_SESSION_MESG_SIZE, static_fp);
-        
-    }
-    
-    //Activity message
-    {
-        FIT_UINT8 local_mesg_number = 4;
-        FIT_ACTIVITY_MESG activity;
-        
-        Fit_InitMesg(fit_mesg_defs[FIT_MESG_ACTIVITY], &activity);
-        activity.num_sessions = 1;
-        
-        WriteMessageDefinition(local_mesg_number, fit_mesg_defs[FIT_MESG_ACTIVITY],
-                               FIT_ACTIVITY_MESG_DEF_SIZE, static_fp);
-        WriteMessage(local_mesg_number, &activity, FIT_ACTIVITY_MESG_SIZE, static_fp);
-        
-    }
+//    //Session message
+//    {
+//        FIT_UINT8 local_mesg_number = 3;
+//        FIT_SESSION_MESG session;
+//        
+//        Fit_InitMesg(fit_mesg_defs[FIT_MESG_SESSION], &session);
+//        session.sport = sport;
+//        
+//        WriteMessageDefinition(local_mesg_number, fit_mesg_defs[FIT_MESG_SESSION],
+//                               FIT_SESSION_MESG_DEF_SIZE, static_fp); //所有字段定义过长，正尝试如何裁剪
+//        WriteMessage(local_mesg_number, &session, FIT_SESSION_MESG_SIZE, static_fp);
+//        
+//    }
+//    
+//    //Activity message
+//    {
+//        FIT_UINT8 local_mesg_number = 4;
+//        FIT_ACTIVITY_MESG activity;
+//        
+//        Fit_InitMesg(fit_mesg_defs[FIT_MESG_ACTIVITY], &activity);
+//        activity.num_sessions = 1;
+//        
+//        WriteMessageDefinition(local_mesg_number, fit_mesg_defs[FIT_MESG_ACTIVITY],
+//                               FIT_ACTIVITY_MESG_DEF_SIZE, static_fp);
+//        WriteMessage(local_mesg_number, &activity, FIT_ACTIVITY_MESG_SIZE, static_fp);
+//        
+//    }
     
     
     
